@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCookery</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <button id="hamburger" class="hamburger">
+            &#9776;
+        </button>
+        <div class="sidebar-content">
+            <h2>Filters</h2>
+            <div class="filter-section">
+                <label for="time">Time</label>
+                <input type="range" id="time" name="time" min="1" max="120">
+            </div>
+            <div class="filter-section">
+                <label for="type">Recipe Type</label>
+                <select id="type">
+                    <option value="veg">Vegetarian</option>
+                    <option value="non-veg">Non-Vegetarian</option>
+                </select>
+            </div>
+            <div class="filter-section">
+                <label for="cuisine">Cuisine</label>
+                <select id="cuisine">
+                    <option value="indian">Indian</option>
+                    <option value="chinese">Chinese</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Search for recipes..." oninput="searchRecipe()">
+            <button class="search-icon">&#128269;</button>
+        </div>
+
+        <div class="recipe-cards">
+            <div class="recipe-card" onclick="window.location.href='recipe1.html'">
+                <img src="assets/recipe1.jpg" alt="Paneer Tikka">
+                <h3>Paneer Tikka</h3>
+            </div>
+            <div class="recipe-card" onclick="window.location.href='recipe2.html'">
+                <img src="assets/recipe2.jpg" alt="Butter Chicken">
+                <h3>Butter Chicken</h3>
+            </div>
+            <div class="recipe-card" onclick="window.location.href='recipe3.html'">
+                <img src="assets/recipe3.jpg" alt="Dal Tadka">
+                <h3>Dal Tadka</h3>
+            </div>
+            <div class="recipe-card" onclick="window.location.href='recipe4.html'">
+                <img src="assets/recipe4.jpg" alt="Aloo Gobi">
+                <h3>Aloo Gobi</h3>
+            </div>
+            <div class="recipe-card" onclick="window.location.href='recipe5.html'">
+                <img src="assets/recipe5.jpg" alt="Chole Bhature">
+                <h3>Chole Bhature</h3>
+            </div>
+        </div>
+
+        <!-- Food Facts Section -->
+        <div class="food-facts">
+            <h2>Did you know?</h2>
+            <p>Eating healthy can boost your energy levels and improve your mood.</p>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2025 SmartCookery</p>
+        </footer>
+    </div>
+
+    <script src="scripts/main.js"></script>
+</body>
+</html>

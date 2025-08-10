@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartCookery</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">SmartCookery</div>
+      <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#recipes">Recipes</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="hamburger" onclick="toggleSidebar()">&#9776;</div>
+      <button onclick="toggleDarkMode()">Dark Mode</button>
+    </nav>
+  </header>
+
+  <!-- Main Section -->
+  <main>
+    <section class="hero">
+      <h1>Your desired dish?</h1>
+      <form onsubmit="searchRecipe(event)">
+        <input type="text" id="search-bar" placeholder="Search any recipe (e.g., pizza)">
+        <button type="submit">🔍</button>
+      </form>
+    </section>
+
+    <section id="recipes" class="recipes">
+      <h2>Recipes</h2>
+      <div class="recipe-tags">
+        <span>Breakfast</span>
+        <span>Lunch</span>
+        <span>Dinner</span>
+        <span>Snack</span>
+        <span>Teatime</span>
+      </div>
+      <div class="recipe-cards">
+        <div class="recipe-card" onclick="openRecipe('pizza.html')">
+          <img src="images/pizza.jpg" alt="Pizza">
+          <h3>Pizza</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('pasta.html')">
+          <img src="images/pasta.jpg" alt="Pasta">
+          <h3>Pasta</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('butterchicken.html')">
+          <img src="images/butter_chicken.jpg" alt="Butter Chicken">
+          <h3>Butter Chicken</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('cake.html')">
+          <img src="images/cake.jpg" alt="Cake">
+          <h3>Chocolate Cake</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('mutton.html')">
+          <img src="images/mutton.jpg" alt="Mutton">
+          <h3>Mutton</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('burger.html')">
+          <img src="images/burger.jpg" alt="Burger">
+          <h3>Burger</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('cupcake.html')">
+          <img src="images/cupcake.jpg" alt="Cupcake">
+          <h3>Cupcake</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('bluelagoon.html')">
+          <img src="images/blue_lagoon.jpg" alt="Blue Lagoon">
+          <h3>Blue Lagoon</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('salad.html')">
+          <img src="images/salad.jpg" alt="Salad">
+          <h3>Salad</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('soup.html')">
+          <img src="images/soup.jpg" alt="Soup">
+          <h3>Soup</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('maggie.html')">
+          <img src="images/maggie.jpg" alt="Maggie">
+          <h3>Maggie</h3>
+        </div>
+      </div>
+    </section>
+
+    <section id="recipes" class="recipes">
+      <div class="recipe-cards">
+        <div class="recipe-card" onclick="openRecipe('pizza.html')">
+          <img src="images/pizza.jpg" alt="Pizza">
+          <h3>Pizza</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('pasta.html')">
+          <img src="images/pasta.jpg" alt="Pasta">
+          <h3>Pasta</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('butterchicken.html')">
+          <img src="images/butter_chicken.jpg" alt="Butter Chicken">
+          <h3>Butter Chicken</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('cake.html')">
+          <img src="images/cake.jpg" alt="Cake">
+          <h3>Chocolate Cake</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('mutton.html')">
+          <img src="images/mutton.jpg" alt="Mutton">
+          <h3>Mutton</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('burger.html')">
+          <img src="images/burger.jpg" alt="Burger">
+          <h3>Burger</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('cupcake.html')">
+          <img src="images/cupcake.jpg" alt="Cupcake">
+          <h3>Cupcake</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('bluelagoon.html')">
+          <img src="images/blue_lagoon.jpg" alt="Blue Lagoon">
+          <h3>Blue Lagoon</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('salad.html')">
+          <img src="images/salad.jpg" alt="Salad">
+          <h3>Salad</h3>
+        </div>
+        <div class="recipe-card" onclick="openRecipe('soup.html')">
+          <img src="images/soup.jpg" alt="Soup">
+          <h3>Soup</h3>
+        </div>
+      </div>
+    </section>
+
+    <section id="food-facts" class="food-facts">
+      <h2>Food Facts</h2>
+      <div class="facts">
+      <p>Did you know? Tomatoes are actually a fruit, not a vegetable!</p>
+      <p>Chocolate was once used as currency.</p>
+      <p>Honey never spoils. Archaeologists have found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still edible.</p>
+      <p>Apples float in water because they are 25% air.</p>
+      <p>Bananas are berries, but strawberries aren't.</p>
+      <p>Peanuts are not nuts; they are legumes.</p>
+      <p>Carrots were originally purple in color.</p>
+      <p>One of the most hydrating foods to eat is cucumber, which is 96% water.</p>
+      <p>Potatoes were the first food to be grown in space.</p>
+      </div>
+    </section>
+
+    <section id="about" class="about">
+      <h2>About Us</h2>
+      <p>Welcome to SmartCookery, your number one source for all things cooking. We're dedicated to providing you the very best of recipes, with an emphasis on simplicity, taste, and health.</p>
+      <p>Founded in 2025, SmartCookery has come a long way from its beginnings. When we first started out, our passion for cooking drove us to start our own business.</p>
+      <p>We hope you enjoy our recipes as much as we enjoy offering them to you. If you have any questions or comments, please don't hesitate to contact us.</p>
+    </section>
+
+    <section id="contact" class="contact">
+      <h2>Contact Us</h2>
+      <p>If you have any questions, suggestions, or just want to say hello, feel free to contact us at:</p>
+      <ul>
+        <li>Email: info@smartcookery.com</li>
+        <li>Phone: +123 456 7890</li>
+        <li>Address: 123 Cookery Lane, Food City, FC 12345</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 SmartCookery. All rights reserved.</p>
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+  }
+</script>
