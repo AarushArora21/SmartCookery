@@ -7,7 +7,7 @@ import { toggleDarkMode } from '../../redux/slices/uiSlice'
 import { getInitials } from '../../utils/helpers'
 import { FiSun, FiMoon, FiMenu, FiX, FiHome, FiSearch,
   FiPlusCircle, FiUser, FiLogOut, FiCalendar, FiShoppingCart, FiCpu,
-  FiCamera, FiActivity
+  FiCamera, FiActivity, FiFolder
 } from 'react-icons/fi'
 
 export default function Navbar() {
