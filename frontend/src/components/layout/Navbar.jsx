@@ -5,9 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { logout } from '../../redux/slices/authSlice'
 import { toggleDarkMode } from '../../redux/slices/uiSlice'
 import { getInitials } from '../../utils/helpers'
-import {
-  FiSun, FiMoon, FiMenu, FiX, FiHome, FiSearch,
-  FiPlusCircle, FiUser, FiLogOut, FiCalendar, FiShoppingCart, FiCpu
+import { FiSun, FiMoon, FiMenu, FiX, FiHome, FiSearch,
+  FiPlusCircle, FiUser, FiLogOut, FiCalendar, FiShoppingCart, FiCpu,
+  FiCamera, FiActivity
 } from 'react-icons/fi'
 
 export default function Navbar() {
@@ -24,6 +24,9 @@ export default function Navbar() {
     ...(token ? [
       { to: '/ai-generator', label: 'AI Chef', icon: <FiCpu /> },
       { to: '/meal-planner', label: 'Meal Plan', icon: <FiCalendar /> },
+      { to: '/recipe-from-photo', label: 'Photo Recipe', icon: <FiCamera /> },
+      { to: '/nutrition-planner', label: 'Nutrition', icon: <FiActivity /> },
+      { to: '/collections', label: 'Collections', icon: <FiFolder /> },
     ] : [])
   ]
 

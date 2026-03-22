@@ -6,6 +6,7 @@ import { fetchCurrentUser, updateProfile } from '../redux/slices/authSlice'
 import RecipeCard from '../components/recipe/RecipeCard'
 import { getInitials, formatDate } from '../utils/helpers'
 import { FiEdit, FiPlus, FiBookmark, FiGrid, FiUser } from 'react-icons/fi'
+import { getUserBadges } from '../utils/badges'
 
 const TABS = [
   { id: 'my', label: 'My Recipes', icon: <FiGrid size={14} /> },
@@ -80,6 +81,16 @@ export default function DashboardPage() {
               <p className="font-bold text-gray-900 dark:text-white">{user?.followers?.length || 0}</p>
               <p className="text-xs text-gray-500">Followers</p>
             </div>
+            {getUserBadges(user).length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-3 justify-center sm:justify-start">
+            {getUserBadges(user).map(badge => (
+            <span key={badge.id} title={badge.desc}
+            className="flex items-center gap-1 px-2.5 py-1 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 rounded-full text-xs font-medium border border-yellow-200 dark:border-yellow-800">
+            {badge.emoji} {badge.label}
+            </span>
+            ))}
+           </div>
+           )}
           </div>
         </div>
         <Link to="/add-recipe" className="btn-primary flex items-center gap-2 text-sm">

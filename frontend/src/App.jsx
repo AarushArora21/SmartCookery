@@ -18,6 +18,10 @@ import GroceryListPage from './pages/GroceryListPage'
 import ProfilePage from './pages/ProfilePage'
 import NotFoundPage from './pages/NotFoundPage'
 import LoadingSpinner from './components/common/LoadingSpinner'
+import ChefChatbot from './components/common/ChefChatbot'
+import RecipeFromPhotoPage from './pages/RecipeFromPhotoPage'
+import NutritionPlannerPage from './pages/NutritionPlannerPage'
+import CollectionsPage from './pages/CollectionsPage'
 
 const ProtectedRoute = ({ children }) => {
   const { token, initialized } = useSelector(s => s.auth)
@@ -57,11 +61,15 @@ export default function App() {
           <Route path="/ai-generator" element={<ProtectedRoute><AIGeneratorPage /></ProtectedRoute>} />
           <Route path="/meal-planner" element={<ProtectedRoute><MealPlannerPage /></ProtectedRoute>} />
           <Route path="/grocery-list" element={<ProtectedRoute><GroceryListPage /></ProtectedRoute>} />
+          <Route path="/recipe-from-photo" element={<ProtectedRoute><RecipeFromPhotoPage /></ProtectedRoute>} />
+          <Route path="/nutrition-planner" element={<ProtectedRoute><NutritionPlannerPage /></ProtectedRoute>} />
+          <Route path="/collections" element={<ProtectedRoute><CollectionsPage /></ProtectedRoute>} />
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
       <Footer />
+      <ChefChatbot />
     </div>
   )
 }

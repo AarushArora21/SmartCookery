@@ -24,6 +24,7 @@ app.use('/api/recipes', require('./routes/recipes'));
 app.use('/api/user', require('./routes/user'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/nutrition', require('./routes/nutrition'));
+app.use('/api/collections', require('./routes/collections'));
 
 // Health check
 app.get('/api/health', (req, res) => {

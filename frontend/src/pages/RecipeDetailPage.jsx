@@ -8,6 +8,9 @@ import api from '../utils/api'
 import toast from 'react-hot-toast'
 import { formatTime, formatDate, dietBadgeClass, dietLabel, PLACEHOLDER_IMG, difficultyColor } from '../utils/helpers'
 import { FiClock, FiUsers, FiHeart, FiBookmark, FiStar, FiTrash2, FiEdit, FiShare2, FiCheckCircle } from 'react-icons/fi'
+import ScalingIngredients from '../components/recipe/ScalingIngredients'
+import CookMode from '../components/recipe/CookMode'
+import SubstitutionFinder from '../components/recipe/SubstitutionFinder'
 
 export default function RecipeDetailPage() {
   const { id } = useParams()
@@ -19,6 +22,7 @@ export default function RecipeDetailPage() {
   const [submitting, setSubmitting] = useState(false)
   const [checkedSteps, setCheckedSteps] = useState([])
   const [userRating, setUserRating] = useState(0)
+  const [cookMode, setCookMode] = useState(false)
 
   useEffect(() => {
     dispatch(fetchRecipeById(id))
@@ -133,20 +137,10 @@ export default function RecipeDetailPage() {
             )}
 
             {/* Ingredients */}
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                🧂 Ingredients <span className="text-sm font-normal text-gray-500">({recipe.ingredients?.length})</span>
-              </h2>
-              <div className="card divide-y divide-gray-100 dark:divide-gray-700">
-                {recipe.ingredients?.map((ing, i) => (
-                  <div key={i} className="flex items-center justify-between px-5 py-3">
-                    <span className="text-gray-800 dark:text-gray-200 font-medium capitalize">{ing.name}</span>
-                    <span className="text-gray-500 dark:text-gray-400 text-sm">{ing.quantity} {ing.unit}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+            <ScalingIngredients
+            ingredients={recipe.ingredients}
+            baseServings={recipe.servings}
+            />
             {/* Steps */}
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">👨‍🍳 Instructions</h2>
@@ -219,6 +213,10 @@ export default function RecipeDetailPage() {
           <div className="space-y-6">
             {/* Actions */}
             <div className="card p-5 space-y-3">
+              <button onClick={() => setCookMode(true)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-medium bg-gradient-to-r from-primary-500 to-orange-500 text-white hover:opacity-90 transition-all">
+               👨‍🍳 Start Cook Mode
+              </button>
               <button onClick={() => user && dispatch(likeRecipe(recipe._id))}
                 className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-medium transition-all border ${isLiked ? 'bg-red-50 border-red-200 text-red-500 dark:bg-red-900/20 dark:border-red-800' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-red-200 hover:text-red-500'}`}>
                 <FiHeart className={isLiked ? 'fill-red-500' : ''} />
@@ -303,8 +301,10 @@ export default function RecipeDetailPage() {
                 </div>
               </div>
             )}
+            <SubstitutionFinder ingredients={recipe.ingredients} />
           </div>
         </div>
+        {cookMode && <CookMode recipe={recipe} onClose={() => setCookMode(false)} />}
       </motion.div>
     </div>
   )
