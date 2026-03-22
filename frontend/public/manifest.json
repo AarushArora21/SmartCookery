@@ -1,0 +1,12 @@
+{
+  "name": "Smart Cookery",
+  "short_name": "Cookery",
+  "description": "AI-powered cooking assistant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
