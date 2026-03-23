@@ -170,12 +170,16 @@ exports.recipeFromPhoto = async (req, res) => {
     const { imageBase64, mimeType } = req.body
     if (!imageBase64) return res.status(400).json({ success: false, message: 'Image is required' })
 
-    // Use Groq vision - if not available fall back to text only
-    const prompt = `You are a professional chef. Look at this food image and:
-1. Identify the dish
-2. Generate a complete recipe for it
+    const prompt = `You are a strict food detection AI. 
 
-Respond ONLY with valid JSON (no extra text):
+STEP 1 - Check if the image contains food:
+- Is there a cooked dish, meal, food item, or drink visible? YES or NO
+
+STEP 2 - Based on your answer:
+- If NO food → respond with ONLY this exact JSON: {"error": "not_food", "message": "This doesn't look like a food photo. Please upload a clear photo of a dish or meal."}
+- If YES food → respond with the recipe JSON below
+
+Recipe JSON format (only if food detected):
 {
   "title": "Dish Name",
   "description": "Brief description",
@@ -189,57 +193,132 @@ Respond ONLY with valid JSON (no extra text):
   "steps": [{"stepNumber": 1, "instruction": "Step description", "duration": 5}],
   "nutrition": {"calories": 350, "protein": 15, "carbs": 40, "fat": 12, "fiber": 5},
   "tags": ["homemade"]
-}`
+}
 
-    // Try vision model first
+IMPORTANT: Respond with JSON only. No extra text. No explanation.`
+
+    // Build request body
     const body = JSON.stringify({
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
       messages: [{
         role: 'user',
         content: [
-          { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}` } },
+          {
+            type: 'image_url',
+            image_url: { url: `data:${mimeType};base64,${imageBase64}` }
+          },
           { type: 'text', text: prompt }
         ]
       }],
       max_tokens: 1500,
-      temperature: 0.7
+      temperature: 0.1  // low temperature = more consistent/strict responses
     })
 
-    const result = await new Promise((resolve, reject) => {
-      const options = {
-        hostname: 'api.groq.com',
-        path: '/openai/v1/chat/completions',
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(body)
+    // Promise with timeout (10 seconds)
+    const result = await Promise.race([
+      new Promise((resolve, reject) => {
+        const options = {
+          hostname: 'api.groq.com',
+          path: '/openai/v1/chat/completions',
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(body)
+          }
         }
-      }
-      const req = https.request(options, (response) => {
-        let data = ''
-        response.on('data', chunk => data += chunk)
-        response.on('end', () => {
-          try { resolve(JSON.parse(data)) }
-          catch (e) { reject(e) }
+        const request = require('https').request(options, (response) => {
+          let data = ''
+          response.on('data', chunk => data += chunk)
+          response.on('end', () => {
+            try { resolve(JSON.parse(data)) }
+            catch (e) { reject(new Error('Invalid response from AI')) }
+          })
         })
-      })
-      req.on('error', reject)
-      req.write(body)
-      req.end()
-    })
+        request.on('error', reject)
+        request.write(body)
+        request.end()
+      }),
+      // Timeout after 10 seconds
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('AI request timed out. Please try again.')), 10000)
+      )
+    ])
 
     console.log('recipeFromPhoto result:', JSON.stringify(result).slice(0, 300))
 
+    // Handle API errors
     if (result.error) {
-      return res.status(500).json({ success: false, message: result.error.message })
+      return res.status(500).json({
+        success: false,
+        message: result.error.message || 'AI service error'
+      })
     }
 
-    const recipe = extractJSON(result.choices[0].message.content)
-    res.json({ success: true, recipe })
+    // Parse the response
+    const text = result.choices[0].message.content
+    const clean = text.replace(/```json|```/g, '').trim()
+
+    let parsed
+    try {
+      // Find JSON in the response
+      const start = clean.indexOf('{')
+      const end = clean.lastIndexOf('}')
+      if (start === -1 || end === -1) throw new Error('No JSON found')
+      parsed = JSON.parse(clean.slice(start, end + 1))
+    } catch (e) {
+      // If we can't parse JSON, check if response mentions no food
+      const lowerText = clean.toLowerCase()
+      if (
+        lowerText.includes('not food') ||
+        lowerText.includes('no food') ||
+        lowerText.includes('not a dish') ||
+        lowerText.includes('not a food') ||
+        lowerText.includes('cannot identify') ||
+        lowerText.includes("don't see food") ||
+        lowerText.includes('no dish')
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "This doesn't look like a food photo. Please upload a clear photo of a dish or meal."
+        })
+      }
+      return res.status(500).json({ success: false, message: 'Failed to parse AI response' })
+    }
+
+    // Check if AI explicitly said not food
+    if (parsed.error === 'not_food') {
+      return res.status(400).json({
+        success: false,
+        message: parsed.message || "This doesn't look like a food photo. Please upload a clear photo of a dish or meal."
+      })
+    }
+
+    // Check if required recipe fields exist
+    if (!parsed.title || !parsed.ingredients || !parsed.steps) {
+      return res.status(400).json({
+        success: false,
+        message: "Couldn't identify a dish in this photo. Please try a clearer food photo."
+      })
+    }
+
+    res.json({ success: true, recipe: parsed })
+
   } catch (error) {
     console.error('recipeFromPhoto error:', error.message)
-    res.status(500).json({ success: false, message: 'Failed to analyse image: ' + error.message })
+
+    // Handle timeout specifically
+    if (error.message.includes('timed out')) {
+      return res.status(408).json({
+        success: false,
+        message: 'Request timed out. Please try again with a clearer photo.'
+      })
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to analyse image'
+    })
   }
 }
 

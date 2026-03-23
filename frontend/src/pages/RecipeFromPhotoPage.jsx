@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
-import { FiUpload, FiCamera, FiX, FiArrowRight } from 'react-icons/fi'
+import { FiUpload, FiCamera, FiX, FiArrowRight, FiAlertCircle } from 'react-icons/fi'
 import { formatTime } from '../utils/helpers'
 
 export default function RecipeFromPhotoPage() {
@@ -15,6 +15,7 @@ export default function RecipeFromPhotoPage() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [dragOver, setDragOver] = useState(false)
+  const [error, setError] = useState(null)  // NEW: track error state
 
   const handleFile = (file) => {
     if (!file || !file.type.startsWith('image/')) {
@@ -28,6 +29,7 @@ export default function RecipeFromPhotoPage() {
     setImage(file)
     setPreview(URL.createObjectURL(file))
     setResult(null)
+    setError(null)  // clear any previous error
   }
 
   const handleDrop = (e) => {
@@ -40,21 +42,37 @@ export default function RecipeFromPhotoPage() {
     if (!image) return
     setLoading(true)
     setResult(null)
+    setError(null)
 
     try {
       const reader = new FileReader()
       reader.onloadend = async () => {
-        const base64 = reader.result.split(',')[1]
-        const { data } = await api.post('/ai/recipe-from-photo', {
-          imageBase64: base64,
-          mimeType: image.type
-        })
-        setResult(data.recipe)
+        try {
+          const base64 = reader.result.split(',')[1]
+          const { data } = await api.post('/ai/recipe-from-photo', {
+            imageBase64: base64,
+            mimeType: image.type
+          })
+          setResult(data.recipe)
+        } catch (err) {
+          // Get the error message from backend
+          const message = err.response?.data?.message
+            || 'Failed to analyse image. Please try again.'
+
+          // Show error UI immediately — don't just toast
+          setError(message)
+          toast.error(message)
+        } finally {
+          setLoading(false)
+        }
+      }
+      reader.onerror = () => {
+        setError('Failed to read image file')
         setLoading(false)
       }
       reader.readAsDataURL(image)
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to analyse image')
+      setError('Something went wrong. Please try again.')
       setLoading(false)
     }
   }
@@ -63,6 +81,7 @@ export default function RecipeFromPhotoPage() {
     setImage(null)
     setPreview(null)
     setResult(null)
+    setError(null)
   }
 
   return (
@@ -88,20 +107,19 @@ export default function RecipeFromPhotoPage() {
             className={`card border-2 border-dashed transition-all ${
               dragOver
                 ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                : error
+                ? 'border-red-300 dark:border-red-700'
                 : 'border-gray-200 dark:border-gray-700'
             }`}
           >
             {preview ? (
               <div className="relative">
                 <img src={preview} alt="uploaded"
-                  className="w-full max-h-80 object-cover rounded-2xl" />
+                  className={`w-full max-h-80 object-cover rounded-2xl ${error ? 'opacity-60' : ''}`} />
                 <button onClick={reset}
-                  className="absolute top-3 right-3 bg-white/90 dark:bg-gray-800/90 p-2 rounded-xl shadow-sm hover:bg-white dark:hover:bg-gray-700 transition-colors">
+                  className="absolute top-3 right-3 bg-white/90 dark:bg-gray-800/90 p-2 rounded-xl shadow-sm hover:bg-white transition-colors">
                   <FiX size={16} className="text-gray-700 dark:text-gray-300" />
                 </button>
-                <div className="absolute bottom-3 left-3 bg-black/50 text-white text-xs px-3 py-1.5 rounded-xl">
-                  {image?.name}
-                </div>
               </div>
             ) : (
               <label className="flex flex-col items-center justify-center py-16 cursor-pointer">
@@ -127,7 +145,25 @@ export default function RecipeFromPhotoPage() {
             )}
           </div>
 
-          {/* Example dishes */}
+          {/* ERROR MESSAGE — shows immediately when not food */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl"
+            >
+              <FiAlertCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-semibold text-red-700 dark:text-red-300 text-sm">Not a food photo</p>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-0.5">{error}</p>
+              </div>
+              <button onClick={reset} className="text-red-400 hover:text-red-600 transition-colors">
+                <FiX size={16} />
+              </button>
+            </motion.div>
+          )}
+
+          {/* Try with examples */}
           {!preview && (
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 text-center">Try with photos of:</p>
@@ -141,7 +177,8 @@ export default function RecipeFromPhotoPage() {
             </div>
           )}
 
-          {preview && (
+          {/* Analyse button */}
+          {preview && !error && (
             <button onClick={handleAnalyse} disabled={loading}
               className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2">
               {loading ? (
@@ -155,16 +192,26 @@ export default function RecipeFromPhotoPage() {
             </button>
           )}
 
-          {/* Loading state */}
+          {/* Try again button when error */}
+          {error && (
+            <button onClick={reset} className="btn-primary w-full py-4 text-base">
+              📸 Try a Different Photo
+            </button>
+          )}
+
+          {/* Loading steps */}
           {loading && (
-            <div className="text-center py-6 space-y-3">
-              {['🔍 Identifying the dish...', '👨‍🍳 Generating recipe...', '📊 Calculating nutrition...'].map((step, i) => (
-                <motion.p key={step} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 1.5 }}
-                  className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2">
-                  <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
-                    ⚙️
-                  </motion.span>
+            <div className="text-center py-4 space-y-2">
+              {[
+                '🔍 Checking if this is a food photo...',
+                '👨‍🍳 Identifying the dish...',
+                '📝 Generating recipe...'
+              ].map((step, i) => (
+                <motion.p key={step}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 2 }}
+                  className="text-sm text-gray-500 dark:text-gray-400">
                   {step}
                 </motion.p>
               ))}
@@ -175,7 +222,6 @@ export default function RecipeFromPhotoPage() {
         /* Result */
         <AnimatePresence>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            {/* Detected dish */}
             <div className="card overflow-hidden">
               <div className="bg-gradient-to-r from-pink-500 to-rose-600 p-5 text-white">
                 <p className="text-pink-100 text-sm mb-1">✅ Dish Identified</p>
@@ -191,7 +237,6 @@ export default function RecipeFromPhotoPage() {
                 </div>
               </div>
 
-              {/* Side by side: image + ingredients */}
               <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <img src={preview} alt="uploaded dish"
@@ -210,7 +255,6 @@ export default function RecipeFromPhotoPage() {
                 </div>
               </div>
 
-              {/* Steps */}
               <div className="px-5 pb-5">
                 <h3 className="font-bold text-gray-900 dark:text-white mb-3">👨‍🍳 Instructions</h3>
                 <div className="space-y-3">
@@ -227,7 +271,6 @@ export default function RecipeFromPhotoPage() {
                 </div>
               </div>
 
-              {/* Nutrition */}
               {result.nutrition && (
                 <div className="px-5 pb-5">
                   <h3 className="font-bold text-gray-900 dark:text-white mb-3">📊 Nutrition</h3>
@@ -249,13 +292,11 @@ export default function RecipeFromPhotoPage() {
                 </div>
               )}
 
-              {/* Actions */}
               <div className="px-5 pb-5 flex gap-3">
                 <button onClick={reset} className="btn-secondary flex-1 text-sm">
                   📸 Try Another Photo
                 </button>
-                <button
-                  onClick={() => navigate('/add-recipe')}
+                <button onClick={() => navigate('/add-recipe')}
                   className="btn-primary flex-1 text-sm flex items-center justify-center gap-1">
                   Save as Recipe <FiArrowRight size={14} />
                 </button>
